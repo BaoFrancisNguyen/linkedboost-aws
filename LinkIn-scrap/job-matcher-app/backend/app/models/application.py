@@ -1,8 +1,31 @@
+# app/models/application.py
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 from bson import ObjectId
 from app.models.user import PyObjectId
+
+class ApplicationCreate(BaseModel):
+    jobId: str
+    coverLetter: Optional[str] = None
+    resumeUrl: Optional[str] = None
+    useLinkedInProfile: bool = False
+    notes: Optional[str] = None
+    
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+
+class ApplicationUpdate(BaseModel):
+    coverLetter: Optional[str] = None
+    resumeUrl: Optional[str] = None
+    useLinkedInProfile: Optional[bool] = None
+    status: Optional[str] = None
+    notes: Optional[str] = None
+    
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
 
 class Application(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
@@ -18,7 +41,7 @@ class Application(BaseModel):
     lastStatusChange: datetime = Field(default_factory=datetime.utcnow)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {
             ObjectId: str,

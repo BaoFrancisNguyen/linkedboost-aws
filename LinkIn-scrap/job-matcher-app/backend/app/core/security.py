@@ -1,20 +1,22 @@
+# app/core/security.py
 from datetime import datetime, timedelta
-from typing import Optional
-from jose import jwt
+from typing import Optional, Union, Any
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 from app.core.config import settings
 
+# Configuration pour le hachage des mots de passe
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def verify_password(plain_password, hashed_password):
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Vérifie si le mot de passe en clair correspond au mot de passe haché."""
     return pwd_context.verify(plain_password, hashed_password)
 
-def get_password_hash(password):
+def get_password_hash(password: str) -> str:
     """Génère un hash du mot de passe."""
     return pwd_context.hash(password)
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Crée un token JWT."""
     to_encode = data.copy()
     
@@ -27,3 +29,19 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     
     return encoded_jwt
+
+def verify_token(token: str) -> Optional[dict]:
+    """Vérifie et décode un token JWT."""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        return payload
+    except JWTError:
+        return None
+
+def decode_token(token: str) -> Union[dict, None]:
+    """Décode un token JWT sans vérification d'expiration (pour debug)."""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM], options={"verify_exp": False})
+        return payload
+    except JWTError:
+        return None

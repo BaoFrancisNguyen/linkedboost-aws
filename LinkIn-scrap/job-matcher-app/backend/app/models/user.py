@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field, EmailStr 
-from typing import Optional, List, Annotated, ClassVar, Any
-from datetime import datetime 
-from bson import ObjectId 
+# app/models/user.py
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List, Any
+from datetime import datetime
+from bson import ObjectId
 from pydantic import GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
 
@@ -26,8 +27,6 @@ class PyObjectId(ObjectId):
             "pattern": "^[a-f0-9]{24}$",
         }
 
-# ... existing code ...
-
 class NotificationSettings(BaseModel):
     email: bool = True
     app: bool = True
@@ -36,72 +35,70 @@ class NotificationSettings(BaseModel):
     opportunities: bool = True
     automationAlerts: bool = True
     
-    model_config = {
-        "populate_by_name": True,
-        "arbitrary_types_allowed": True,
-        "json_encoders": {
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {
             ObjectId: str,
             datetime: lambda dt: dt.isoformat()
         }
-    }
 
 class PrivacySettings(BaseModel):
     shareData: bool = True
     allowAnalytics: bool = True
     
-    model_config = {
-        "populate_by_name": True,
-        "arbitrary_types_allowed": True,
-        "json_encoders": {
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {
             ObjectId: str,
             datetime: lambda dt: dt.isoformat()
         }
-    }
 
 class UserSettings(BaseModel):
     notifications: NotificationSettings = Field(default_factory=NotificationSettings)
     privacy: PrivacySettings = Field(default_factory=PrivacySettings)
     theme: str = "light"
     
-    model_config = {
-        "populate_by_name": True,
-        "arbitrary_types_allowed": True,
-        "json_encoders": {
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {
             ObjectId: str,
             datetime: lambda dt: dt.isoformat()
         }
-    }
 
 class UserBase(BaseModel):
     firstName: str
     lastName: str
     email: EmailStr
     
-    model_config = {
-        "populate_by_name": True,
-        "arbitrary_types_allowed": True,
-        "json_encoders": {
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {
             ObjectId: str,
             datetime: lambda dt: dt.isoformat()
         }
-    }
-    
-class UserCreate(UserBase):
+
+class UserCreate(BaseModel):
+    firstName: str
+    lastName: str
+    email: EmailStr
     password: str
     
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
     
-    model_config = {
-        "populate_by_name": True,
-        "arbitrary_types_allowed": True,
-        "json_encoders": {
-            ObjectId: str,
-            datetime: lambda dt: dt.isoformat()
-        }
-    }
-    
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+
 class UserUpdate(BaseModel):
     firstName: Optional[str] = None
     lastName: Optional[str] = None
@@ -112,17 +109,15 @@ class UserUpdate(BaseModel):
     position: Optional[str] = None
     location: Optional[str] = None
     
-    model_config = {
-        "populate_by_name": True,
-        "arbitrary_types_allowed": True,
-        "json_encoders": {
-            ObjectId: str,
-            datetime: lambda dt: dt.isoformat()
-        }
-    }
-    
-class User(UserBase):
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+
+class User(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    firstName: str
+    lastName: str
+    email: EmailStr
     password: str
     profilePicture: Optional[str] = None
     headline: Optional[str] = None
@@ -141,11 +136,10 @@ class User(UserBase):
     role: str = "user"
     settings: UserSettings = Field(default_factory=UserSettings)
     
-    model_config = {
-        "populate_by_name": True,
-        "arbitrary_types_allowed": True,
-        "json_encoders": {
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {
             ObjectId: str,
             datetime: lambda dt: dt.isoformat()
         }
-    }

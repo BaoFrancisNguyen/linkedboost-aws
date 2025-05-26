@@ -1,10 +1,12 @@
+# app/models/scraping.py
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, List
 from datetime import datetime
 from bson import ObjectId
+from app.models.user import PyObjectId
 
 class ScrapingSession(BaseModel):
-    id: Optional[str] = Field(None, alias="_id")
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     user_id: str
     search_query: str
     location: Optional[str] = None
@@ -17,7 +19,9 @@ class ScrapingSession(BaseModel):
     error: Optional[str] = None
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
+        arbitrary_types_allowed = True
         json_encoders = {
-            ObjectId: str
+            ObjectId: str,
+            datetime: lambda dt: dt.isoformat()
         }
